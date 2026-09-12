@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Button, Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ExternalLink } from '@/components/external-link';
@@ -10,6 +10,7 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { confirmWithBiometrics } from '@/lib/biometrics';
 
 export default function TabTwoScreen() {
   const safeAreaInsets = useSafeAreaInsets();
@@ -31,6 +32,10 @@ export default function TabTwoScreen() {
       paddingBottom: Spacing.four,
     },
   });
+
+  async function handleBiometricCheck() {
+    await confirmWithBiometrics('Проверить биометрию');
+  }
 
   return (
     <ScrollView
@@ -56,6 +61,8 @@ export default function TabTwoScreen() {
               </ThemedView>
             </Pressable>
           </ExternalLink>
+
+          <Button title="Проверить биометрию" onPress={() => void handleBiometricCheck()} />
         </ThemedView>
 
         <ThemedView style={styles.sectionsWrapper}>

@@ -33,6 +33,12 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Разрешите Face ID для безопасного входа и подтверждения операций."
+        }
       ]
     ],
     "experiments": {
