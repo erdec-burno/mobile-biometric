@@ -167,7 +167,27 @@ npx expo run:ios
 Для локального хранения токенов используйте `expo-secure-store`, а не
 `AsyncStorage`.
 
+## 7. Повторная проверка после возврата в приложение
+
+`BiometricGate` в `src/components/biometric-gate.tsx` отслеживает состояние
+приложения через React Native `AppState`.
+
+После успешного входа происходит следующее:
+
+1. Пользователь сворачивает приложение или открывает другое приложение —
+   состояние становится `background` или `inactive`.
+2. Шлюз помечает текущий локальный доступ как требующий новой проверки.
+3. Пользователь возвращается в приложение — состояние становится `active`.
+4. Основное содержимое снова скрывается, а системный запрос отпечатка или Face
+   ID открывается автоматически.
+
+Если пользователь отменяет этот запрос, экран остаётся заблокированным и
+предлагает кнопку «Повторить проверку». Для Android не используется событие
+`blur`: оно может сработать при открытии шторки уведомлений, хотя приложение не
+уходило в фон.
+
 ## Официальная документация
 
 - [Expo LocalAuthentication, SDK 57](https://docs.expo.dev/versions/v57.0.0/sdk/local-authentication/)
 - [Expo development builds](https://docs.expo.dev/develop/development-builds/use-development-builds/)
+- [React Native AppState](https://reactnative.dev/docs/appstate.html)
