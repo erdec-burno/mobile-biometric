@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, StyleSheet } from 'react-native';
+import { AppState, Button, StyleSheet, type AppStateStatus } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -25,6 +25,9 @@ export function BiometricGate({
   const [isConfirming, setIsConfirming] = useState(false);
   const [failureReason, setFailureReason] = useState<BiometricFailureReason | null>(null);
   const hasRequestedOnStart = useRef(false);
+  const appState = useRef<AppStateStatus>(AppState.currentState);
+  const isAuthenticatedRef = useRef(false);
+  const shouldReauthenticate = useRef(false);
 
   const authenticate = useCallback(async () => {
     setIsConfirming(true);
@@ -34,6 +37,7 @@ export function BiometricGate({
     setIsConfirming(false);
 
     if (result.success) {
+      isAuthenticatedRef.current = true;
       setIsAuthenticated(true);
       return;
     }
@@ -46,6 +50,30 @@ export function BiometricGate({
       hasRequestedOnStart.current = true;
       void authenticate();
     }
+  }, [authenticate]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      const wasInBackground = appState.current === 'background' || appState.current === 'inactive';
+
+      if (
+        isAuthenticatedRef.current &&
+        (nextAppState === 'background' || nextAppState === 'inactive')
+      ) {
+        shouldReauthenticate.current = true;
+      }
+
+      appState.current = nextAppState;
+
+      if (wasInBackground && nextAppState === 'active' && shouldReauthenticate.current) {
+        shouldReauthenticate.current = false;
+        isAuthenticatedRef.current = false;
+        setIsAuthenticated(false);
+        void authenticate();
+      }
+    });
+
+    return () => subscription.remove();
   }, [authenticate]);
 
   if (isAuthenticated) {
